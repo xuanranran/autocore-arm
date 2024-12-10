@@ -46,6 +46,7 @@ define Package/autocore/install/Default
 
 	$(INSTALL_DIR) $(1)/sbin
 	$(INSTALL_BIN) ./files/generic/cpuinfo $(1)/sbin/
+	$(INSTALL_BIN) ./files/generic/ethinfo $(1)/sbin/
 
 	$(INSTALL_DIR) $(1)/usr/share/rpcd/acl.d
 	$(CP) ./files/generic/luci-mod-status-autocore.json $(1)/usr/share/rpcd/acl.d/

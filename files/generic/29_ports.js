@@ -262,13 +262,19 @@ function renderNetworkBadge(network, zonename) {
 		'\u202f', network.getName(), ': '
 	]);
 
-	if (l3dev)
-		span.appendChild(E('img', {
-			'title': l3dev.getI18n(),
-			'src': L.resource('icons/%s%s.png'.format(l3dev.getType(), l3dev.isUp() ? '' : '_disabled'))
-		}));
-	else
+	if (l3dev) {
+		var icon_base = 'icons/%s%s'.format(l3dev.getType(), l3dev.isUp() ? '' : '_disabled');
+		span.appendChild(E('picture', {}, [
+			E('source', { 'srcset': L.resource(icon_base + '.svg'), 'type': 'image/svg+xml' }),
+			E('img', {
+				'title': l3dev.getI18n(),
+				'src': L.resource(icon_base + '.png')
+			})
+		]));
+	}
+	else {
 		span.appendChild(E('em', _('(no interfaces attached)')));
+	}
 
 	return span;
 }
@@ -355,11 +361,16 @@ return baseclass.extend({
 			    carrier = port.netdev.getCarrier(),
 			    pmap = port_map[port.netdev.getName()],
 			    pzones = (pmap && pmap.zones.length) ? pmap.zones.sort(function(a, b) { return L.naturalCompare(a.getName(), b.getName()) }) : [ null ];
+			
+			var port_icon_base = 'icons/port_%s'.format(carrier ? 'up' : 'down');
 
 			return E('div', { 'class': 'ifacebox', 'style': 'margin:.25em;min-width:70px;max-width:100px' }, [
 				E('div', { 'class': 'ifacebox-head', 'style': 'font-weight:bold' }, [ port.netdev.getName() ]),
 				E('div', { 'class': 'ifacebox-body' }, [
-					E('img', { 'src': L.resource('icons/port_%s.png').format(carrier ? 'up' : 'down') }),
+					E('picture', {}, [
+						E('source', { 'srcset': L.resource(port_icon_base + '.svg'), 'type': 'image/svg+xml' }),
+						E('img', { 'src': L.resource(port_icon_base + '.png') })
+					]),
 					E('br'),
 					formatSpeed(carrier, speed, duplex)
 				]),

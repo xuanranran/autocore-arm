@@ -69,7 +69,7 @@ return baseclass.extend({
 		    cpuinfo     = data[3],
 		    cpuusage    = data[4],
 		    tempinfo    = data[5],
-		    luciversion = data[6];
+		    luciversion = data[6],
 		    unixtime    = data[7];
 
 		luciversion = luciversion.branch + ' ' + luciversion.revision;

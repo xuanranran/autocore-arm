@@ -16,12 +16,13 @@ const callLuciETHInfo = rpc.declare({
 const callNetworkDeviceStatus = rpc.declare({
 	object: 'network.device',
 	method: 'status',
-	params: ['name'],
+	params: [ 'name' ],
 	expect: { '': {} }
 });
 
-function isString(v) {
-	return typeof (v) === 'string' && v !== '';
+function isString(v)
+{
+	return typeof(v) === 'string' && v !== '';
 }
 
 function resolveVLANChain(ifname, bridges, mapping) {
@@ -48,7 +49,8 @@ function resolveVLANChain(ifname, bridges, mapping) {
 	}
 }
 
-function buildVLANMappings(mapping) {
+function buildVLANMappings(mapping)
+{
 	const bridge_vlans = uci.sections('network', 'bridge-vlan');
 	const vlan_devices = uci.sections('network', 'device');
 	const interfaces = uci.sections('network', 'interface');
@@ -142,7 +144,8 @@ function buildVLANMappings(mapping) {
 	}
 }
 
-function resolveVLANPorts(ifname, mapping, seen) {
+function resolveVLANPorts(ifname, mapping, seen)
+{
 	const ports = [];
 
 	if (!seen)
@@ -244,7 +247,7 @@ function getPSEStatus(pse) {
 		return null;
 
 	const status = pse['c33-power-status'] || pse['podl-power-status'],
-		power = pse['c33-actual-power'];
+	    power = pse['c33-actual-power'];
 
 	return {
 		status: status,
@@ -258,25 +261,25 @@ function formatPSEPower(pse) {
 		return null;
 
 	const status = pse['c33-power-status'] || pse['podl-power-status'],
-		power = pse['c33-actual-power'];
+	    power = pse['c33-actual-power'];
 
 	if (status === 'delivering' && power) {
 		const watts = (power / 1000).toFixed(1);
 		/* Format: "⚡ 15.4 W" - lightning bolt + narrow space + watts + narrow space + W */
 		return E('span', { 'style': 'color:#000' },
-			['\u26a1\ufe0e\u202f%s\u202fW'.format(watts)]);
+			[ '\u26a1\ufe0e\u202f%s\u202fW'.format(watts) ]);
 	}
 	else if (status === 'searching') {
 		return E('span', { 'style': 'color:#000' },
-			['\u26a1\ufe0e\u202f' + _('searching')]);
+			[ '\u26a1\ufe0e\u202f' + _('searching') ]);
 	}
 	else if (status === 'fault' || status === 'otherfault' || status === 'error') {
 		return E('span', { 'style': 'color:#d9534f' },
-			['\u26a1\ufe0e\u202f' + _('fault')]);
+			[ '\u26a1\ufe0e\u202f' + _('fault') ]);
 	}
 	else if (status === 'disabled') {
 		return E('span', { 'style': 'color:#888' },
-			['\u26a1\ufe0e\u202f' + _('off')]);
+			[ '\u26a1\ufe0e\u202f' + _('off') ]);
 	}
 
 	return null;
@@ -301,9 +304,9 @@ function formatStats(portdev, pse) {
 
 	if (pse) {
 		const status = pse['c33-power-status'] || pse['podl-power-status'],
-			power = pse['c33-actual-power'],
-			powerClass = pse['c33-power-class'],
-			powerLimit = pse['c33-available-power-limit'];
+		    power = pse['c33-actual-power'],
+		    powerClass = pse['c33-power-class'],
+		    powerLimit = pse['c33-available-power-limit'];
 
 		items.push(_('PoE status'), status || _('unknown'));
 
@@ -343,7 +346,7 @@ function renderNetworkBadge(network, zonename) {
 }
 
 function renderNetworksTooltip(pmap) {
-	const res = [null];
+	const res = [ null ];
 	const zmap = {};
 
 	const zones = (pmap && Array.isArray(pmap.zones)) ? pmap.zones : [];
@@ -378,17 +381,19 @@ return baseclass.extend({
 			network.getNetworks(),
 			uci.load('network')
 		]).then((data) => {
-			/* Get all known port names from callLuciETHInfo or board.json */
-			const luciETHInfo = data[0];
+			/* Get all known port names from builtin ports or board.json */
+			const builtinPorts = data[0] || [];
 			const board = JSON.parse(data[1] || '{}');
 			const allPorts = new Set();
 
-			if (Array.isArray(luciETHInfo) && luciETHInfo.length > 0) {
-				luciETHInfo.forEach((port) => {
-					if (port.device)
-						allPorts.add(port.device);
-				});
-			} else if (board.network) {
+			/* Collect port names from builtin ethernet ports */
+			builtinPorts.forEach((port) => {
+				if (port.device)
+					allPorts.add(port.device);
+			});
+
+			/* Collect port names from board.json if no builtin ports */
+			if (allPorts.size === 0 && board.network) {
 				['lan', 'wan'].forEach((role) => {
 					if (board.network[role]) {
 						if (Array.isArray(board.network[role].ports))
@@ -423,8 +428,8 @@ return baseclass.extend({
 			return null;
 
 		const board = JSON.parse(data[1]),
-			port_map = buildInterfaceMapping(data[2], data[3]),
-			pseMap = data[5] || {};
+		      port_map = buildInterfaceMapping(data[2], data[3]),
+		      pseMap = data[5] || {};
 		let known_ports = [];
 
 		if (Array.isArray(data[0]) && data[0].length > 0) {
@@ -460,12 +465,12 @@ return baseclass.extend({
 			return L.naturalCompare(a.device, b.device);
 		});
 
-		return E('div', { 'style': 'display:grid;grid-template-columns:repeat(auto-fit, minmax(70px, 1fr));margin-bottom:1em' }, known_ports.map(function (port) {
+		return E('div', { 'style': 'display:grid;grid-template-columns:repeat(auto-fit, minmax(70px, 1fr));margin-bottom:1em' }, known_ports.map(function(port) {
 			const speed = port.netdev.getSpeed();
 			const duplex = port.netdev.getDuplex();
 			const carrier = port.netdev.getCarrier();
 			const pmap = port_map[port.netdev.getName()];
-			const pzones = (pmap && pmap.zones.length) ? pmap.zones.sort((a, b) => L.naturalCompare(a.getName(), b.getName())) : [null];
+			const pzones = (pmap && pmap.zones.length) ? pmap.zones.sort((a, b) => L.naturalCompare(a.getName(), b.getName())) : [ null ];
 			const pse = pseMap[port.device];
 			const pseInfo = getPSEStatus(pse);
 			const psePower = formatPSEPower(pse);

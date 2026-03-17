@@ -3,7 +3,7 @@
 
 'use strict';
 
-import { stdin, access, dirname, basename, open, popen, glob, lsdir, readfile, readlink, error } from 'fs';
+import { stdin, access, dirname, basename, open, popen, glob, lsdir, readfile, readlink, realpath, error } from 'fs';
 import { cursor } from 'uci';
 
 import { init_list, init_index, init_enabled, init_action, conntrack_list, process_list } from 'luci.sys';
@@ -77,6 +77,7 @@ const methods = {
 		call: function(request) {
 			switch (request.args.action) {
 			case 'enable':
+			case 'enabled':
 			case 'disable':
 			case 'start':
 			case 'stop':
@@ -547,8 +548,8 @@ const methods = {
 
 				for (let line = fd.read('line'); length(line); line = fd.read('line')) {
 					const m = split(line, ' ');
-					const device = replace(m[0], /\\([0-9][0-9][0-9])/g, (m, n) => char(int(n, 8)));
-					const mount  = replace(m[1], /\\([0-9][0-9][0-9])/g, (m, n) => char(int(n, 8)));
+					const device = replace(m[0], /\\([0-9][0-9][0-9])/g, (m, n) => chr(int(n, 8)));
+					const mount  = replace(m[1], /\\([0-9][0-9][0-9])/g, (m, n) => chr(int(n, 8)));
 					const stat = statvfs(mount);
 
 					if (stat?.blocks > 0) {
@@ -642,7 +643,7 @@ const methods = {
 			/* Workaround for targets that do not enumerate  all netdevs in board.json */
 			if (uname().machine in [ 'x86_64' ] &&
 			    match(ports[0]?.device, /^eth\d+$/)) {
-				let bus = readlink(`/sys/class/net/${ports[0].device}/device/subsystem`);
+				let bus = realpath(`/sys/class/net/${ports[0].device}/device/subsystem`);
 
 				for (let netdev in lsdir('/sys/class/net')) {
 					if (!match(netdev, /^eth\d+$/))
@@ -651,7 +652,7 @@ const methods = {
 					if (length(filter(ports, port => port.device == netdev)))
 						continue;
 
-					if (readlink(`/sys/class/net/${netdev}/device/subsystem`) != bus)
+					if (realpath(`/sys/class/net/${netdev}/device/subsystem`) != bus)
 						continue;
 
 					push(ports, { role: 'unknown', device: netdev });

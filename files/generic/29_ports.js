@@ -7,7 +7,7 @@
 'require network';
 'require firewall';
 
-var callLuciETHInfo = rpc.declare({
+const callLuciETHInfo = rpc.declare({
 	object: 'luci',
 	method: 'getETHInfo',
 	expect: { result: [] }
@@ -25,8 +25,7 @@ function isString(v)
 	return typeof(v) === 'string' && v !== '';
 }
 
-function resolveVLANChain(ifname, bridges, mapping)
-{
+function resolveVLANChain(ifname, bridges, mapping) {
 	while (!mapping[ifname]) {
 		const m = ifname.match(/^(.+)\.([^.]+)$/);
 
@@ -40,7 +39,7 @@ function resolveVLANChain(ifname, bridges, mapping)
 				mapping[ifname] = bridges[m[1]].ports;
 		}
 		else if (/^[0-9]{1,4}$/.test(m[2]) && m[2] <= 4095) {
-			mapping[ifname] = [ m[1] ];
+			mapping[ifname] = [m[1]];
 		}
 		else {
 			break;
@@ -119,7 +118,7 @@ function buildVLANMappings(mapping)
 
 			/* parent is a simple netdev */
 			else {
-				mapping[s.name] = [ s.ifname ];
+				mapping[s.name] = [s.ifname];
 			}
 
 			resolveVLANChain(s.ifname, bridges, mapping);
@@ -222,19 +221,19 @@ function formatSpeed(carrier, speed, duplex) {
 		const e = E('span', { 'title': _('Speed: %d Mbit/s, Duplex: %s').format(speed, duplex) });
 
 		switch (true) {
-		case (speed < 1000):
-			e.innerText = '%d\u202fM%s'.format(speed, d);
-			break;
-		case (speed == 1000):
-			e.innerText = '1\u202fGbE' + d;
-			break;
-		case (speed >= 1e6 && speed < 1e9):
-			e.innerText = '%f\u202fTbE'.format(speed / 1e6);
-			break;
-		case (speed >= 1e9):
-			e.innerText = '%f\u202fPbE'.format(speed / 1e9);
-			break;
-		default: e.innerText = '%f\u202fGbE'.format(speed / 1000);
+			case (speed < 1000):
+				e.innerText = '%d\u202fM%s'.format(speed, d);
+				break;
+			case (speed == 1000):
+				e.innerText = '1\u202fGbE' + d;
+				break;
+			case (speed >= 1e6 && speed < 1e9):
+				e.innerText = '%f\u202fTbE'.format(speed / 1e6);
+				break;
+			case (speed >= 1e9):
+				e.innerText = '%f\u202fPbE'.format(speed / 1e9);
+				break;
+			default: e.innerText = '%f\u202fGbE'.format(speed / 1000);
 		}
 
 		return e;
@@ -452,7 +451,7 @@ return baseclass.extend({
 								device: board.network[k].ports[i],
 								netdev: network.instantiateDevice(board.network[k].ports[i])
 							});
-					else if (typeof(board.network[k].device) == 'string')
+					else if (typeof (board.network[k].device) == 'string')
 						known_ports.push({
 							role: k,
 							device: board.network[k].device,
@@ -462,7 +461,7 @@ return baseclass.extend({
 			}
 		}
 
-		known_ports.sort(function(a, b) {
+		known_ports.sort(function (a, b) {
 			return L.naturalCompare(a.device, b.device);
 		});
 
@@ -498,20 +497,20 @@ return baseclass.extend({
 			statsContent.push(E('span', { 'class': 'cbi-tooltip' }, formatStats(port.netdev, pse)));
 
 			return E('div', { 'class': 'ifacebox', 'style': 'margin:.25em;min-width:70px;max-width:100px' }, [
-				E('div', { 'class': 'ifacebox-head', 'style': 'font-weight:bold' }, [ port.netdev.getName() ]),
+				E('div', { 'class': 'ifacebox-head', 'style': 'font-weight:bold' }, [port.netdev.getName()]),
 				E('div', { 'class': 'ifacebox-body' }, [
 					E('img', { 'src': L.resource('icons/port_%s.svg').format(portIcon) }),
 					E('br'),
 					formatSpeed(carrier, speed, duplex)
 				]),
 				E('div', { 'class': 'ifacebox-head cbi-tooltip-container', 'style': 'display:flex' }, [
-					E([], pzones.map(function(zone) {
+					E([], pzones.map(function (zone) {
 						return E('div', {
 							'class': 'zonebadge',
 							'style': 'cursor:help;flex:1;height:3px;opacity:' + (carrier ? 1 : 0.25) + ';' + firewall.getZoneColorStyle(zone)
 						});
 					})),
-					E('span', { 'class': 'cbi-tooltip left' }, [ renderNetworksTooltip(pmap) ])
+					E('span', { 'class': 'cbi-tooltip left' }, [renderNetworksTooltip(pmap)])
 				]),
 				E('div', { 'class': 'ifacebox-body' }, [
 					E('div', { 'class': 'cbi-tooltip-container', 'style': 'text-align:left;font-size:80%' }, statsContent)
